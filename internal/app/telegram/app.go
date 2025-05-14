@@ -4,7 +4,7 @@ import (
 	"awesomeProject/internal/clients/tgClient"
 	"awesomeProject/internal/controller"
 	"awesomeProject/internal/controller/telegram"
-	"awesomeProject/internal/usecases"
+	"awesomeProject/internal/domain"
 	"fmt"
 	"log"
 	"time"
@@ -21,11 +21,11 @@ const (
 	batchSize = 100
 )
 
-func New(token string, use usecases.ResponderUseCase) *App {
+func New(token string, use domain.ResponderUseCase) *App {
 
 	telegramClient := tgClient.New(tgBotHost, token)
 
-	eventsProcessor := telegram.New(telegramClient, use) // use по ссылке
+	eventsProcessor := telegram.New(telegramClient, use)
 
 	return &App{
 		fetcher:   eventsProcessor,

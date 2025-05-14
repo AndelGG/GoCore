@@ -18,9 +18,9 @@ func main() {
 		slog.Int("port", cfg.WebPort),
 	)
 
-	server := app.New(8080, cfg.ChatBotApiKey)
+	server := app.New(cfg, log)
 
-	//server.TgServer.MustRun()
+	go server.TgServer.MustRun()
 	server.WebServer.MustRun()
 }
 

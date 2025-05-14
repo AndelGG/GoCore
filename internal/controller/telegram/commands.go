@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"awesomeProject/internal/domain"
 	"awesomeProject/internal/lib/e"
 	"log"
 	"strings"
@@ -40,8 +41,10 @@ func isRespCmd(text string) bool {
 func (p *Processor) sendResponseToChat(chatID int, text string) (err error) {
 	defer func() { err = e.WrapIfErr("cant do command: saved page", err) }()
 
-	response := p.useCase.Message(text)
-	p.tg.SendMessage(chatID, response)
+	var msg domain.ServiceMessage
+
+	response, _ := p.useCase.SendMessage(&msg)
+	p.tg.SendMessage(chatID, response.Response)
 
 	if err := p.tg.SendMessage(chatID, msgSent); err != nil {
 		return err

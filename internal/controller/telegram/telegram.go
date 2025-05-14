@@ -3,8 +3,8 @@ package telegram
 import (
 	"awesomeProject/internal/clients/tgClient"
 	"awesomeProject/internal/controller"
+	"awesomeProject/internal/domain"
 	"awesomeProject/internal/lib/e"
-	"awesomeProject/internal/usecases"
 	"errors"
 	"fmt"
 )
@@ -12,7 +12,7 @@ import (
 type Processor struct {
 	tg      *tgClient.Client
 	offset  int
-	useCase usecases.ResponderUseCase
+	useCase domain.ResponderUseCase
 }
 
 type Meta struct {
@@ -25,7 +25,7 @@ var (
 	ErrUnknownMetaType  = errors.New("unknown meta type")
 )
 
-func New(client *tgClient.Client, useCase usecases.ResponderUseCase) *Processor {
+func New(client *tgClient.Client, useCase domain.ResponderUseCase) *Processor {
 	return &Processor{
 		tg:      client,
 		useCase: useCase,

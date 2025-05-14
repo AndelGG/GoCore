@@ -1,4 +1,4 @@
-package usecases
+package useCases
 
 import (
 	"awesomeProject/internal/domain"
@@ -10,10 +10,6 @@ import (
 type ChatBotResponder struct {
 	Responder ChatBot
 	log       *slog.Logger
-}
-
-type ResponderUseCase interface {
-	SendMessage(message *domain.Message) (*domain.Message, error)
 }
 
 type ChatBot interface {
@@ -34,7 +30,7 @@ func (u *ChatBotResponder) SendMessage(message *domain.ServiceMessage) (*domain.
 
 	if err != nil {
 		u.log.Warn("request to chatbot error", sl.Err(err))
-		return nil, fmt.Errorf("%s: %w", op, err)
+		return message, fmt.Errorf("%s: %w", op, err)
 	}
 
 	message.Request = obj.Choices[0].Message.Content
