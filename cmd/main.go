@@ -20,7 +20,7 @@ func main() {
 
 	server := app.New(cfg, log)
 
-	go server.TgServer.MustRun()
+	go server.TgServer.Run()
 	server.WebServer.MustRun()
 }
 

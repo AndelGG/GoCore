@@ -5,8 +5,7 @@ import (
 	"awesomeProject/internal/controller"
 	"awesomeProject/internal/controller/telegram"
 	"awesomeProject/internal/domain"
-	"fmt"
-	"log"
+	"log/slog"
 	"time"
 )
 
@@ -14,6 +13,7 @@ type App struct {
 	fetcher   controller.Fetcher
 	processor controller.Processor
 	batchSize int
+	log       *slog.Logger
 }
 
 const (
@@ -21,7 +21,7 @@ const (
 	batchSize = 100
 )
 
-func New(token string, use domain.ResponderUseCase) *App {
+func New(token string, use domain.ResponderUseCase, log *slog.Logger) *App {
 
 	telegramClient := tgClient.New(tgBotHost, token)
 
@@ -31,15 +31,19 @@ func New(token string, use domain.ResponderUseCase) *App {
 		fetcher:   eventsProcessor,
 		processor: eventsProcessor,
 		batchSize: batchSize,
+		log:       log,
 	}
 }
 
-func (a *App) MustRun() error {
-	fmt.Println("TelegramBot is running")
+func (a *App) Run() error {
+	const op = "App.Tg.Run"
+
+	log := a.log.With(slog.String("op", op))
+
 	for {
 		gotEvents, err := a.fetcher.Fetch(a.batchSize)
 		if err != nil {
-			log.Printf("[ERR] consumer: %s", err.Error())
+			log.Warn("[ERR] consumer: %s", err.Error())
 
 			continue
 		}
@@ -50,8 +54,8 @@ func (a *App) MustRun() error {
 			continue
 		}
 
-		if err := a.handleEvents(gotEvents); err != nil {
-			log.Print(err)
+		if err := a.handleEvents(gotEvents, log); err != nil {
+			log.With(err)
 
 			continue
 		}
@@ -64,11 +68,11 @@ func (a *App) MustRun() error {
 	3. Параллельная обработка: sync.WaitGroup
 */
 
-func (a *App) handleEvents(events []controller.Event) error {
+func (a *App) handleEvents(events []controller.Event, log *slog.Logger) error {
 	for _, event := range events {
-		log.Printf("got new event %s", event.Text)
+		log.Info("got new event %s", event.Text)
 		if err := a.processor.Process(event); err != nil {
-			log.Printf("cant handle event: %s", err.Error())
+			log.Warn("cant handle event: %s", err.Error())
 
 			continue
 		}

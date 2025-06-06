@@ -1,4 +1,4 @@
-package tgClient
+package tg
 
 type Update struct {
 	ID      int              `json:"update_id"`

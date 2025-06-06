@@ -19,7 +19,7 @@ func New(api string) *ChatBot {
 
 func (c *ChatBot) RequestToChatBot(message *domain.ServiceMessage) (domain.ResponseScheme, error) {
 
-	op := "chatbot.dp.reqToBot"
+	const op = "chatbot.dp.reqToBot"
 
 	url := "https://api.deepseek.com/chat/completions"
 	method := "POST"
@@ -57,7 +57,7 @@ func (c *ChatBot) RequestToChatBot(message *domain.ServiceMessage) (domain.Respo
 }
 
 func createRequest(msg domain.ServiceMessage, method, url string) (*http.Request, error) {
-	op := "chatbot.createRequest"
+	const op = "chatbot.createRequest"
 
 	payload := strings.NewReader(fmt.Sprintf(`{
   "messages": [
