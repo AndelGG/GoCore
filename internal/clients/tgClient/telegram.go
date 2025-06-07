@@ -1,8 +1,8 @@
 package tgClient
 
 import (
+	"awesomeProject/internal/controller/telegram"
 	"awesomeProject/internal/lib/e"
-	"awesomeProject/internal/lib/tg"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -32,7 +32,7 @@ func newBasePath(token string) string {
 	return "bot" + token
 }
 
-func (c *Client) Updates(offset int, limit int) (updates []tg.Update, err error) {
+func (c *Client) Updates(offset int, limit int) (updates []telegram.Update, err error) {
 	defer func() { err = e.WrapIfErr("cant get updates", err) }()
 	q := url.Values{}
 	q.Add("offset", strconv.Itoa(offset))
@@ -43,7 +43,7 @@ func (c *Client) Updates(offset int, limit int) (updates []tg.Update, err error)
 		return nil, err
 	}
 
-	var res tg.UpdatesResponse
+	var res telegram.UpdatesResponse
 
 	if err := json.Unmarshal(data, &res); err != nil {
 		return nil, err

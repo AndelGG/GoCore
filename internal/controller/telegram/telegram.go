@@ -5,7 +5,6 @@ import (
 	"awesomeProject/internal/controller"
 	"awesomeProject/internal/domain"
 	"awesomeProject/internal/lib/e"
-	"awesomeProject/internal/lib/tg"
 	"errors"
 	"fmt"
 )
@@ -89,7 +88,7 @@ func meta(event controller.Event) (Meta, error) {
 	return res, nil
 }
 
-func event(upd tg.Update) controller.Event {
+func event(upd Update) controller.Event {
 	updType := fetchType(upd)
 
 	res := controller.Event{
@@ -107,7 +106,7 @@ func event(upd tg.Update) controller.Event {
 	return res
 }
 
-func fetchText(upd tg.Update) string {
+func fetchText(upd Update) string {
 	if upd.Message == nil {
 		return ""
 	}
@@ -115,7 +114,7 @@ func fetchText(upd tg.Update) string {
 	return upd.Message.Text
 }
 
-func fetchType(upd tg.Update) controller.Type {
+func fetchType(upd Update) controller.Type {
 	if upd.Message == nil {
 		return controller.Unknown
 	}

@@ -1,4 +1,4 @@
-package tg
+package telegram
 
 type Update struct {
 	ID      int              `json:"update_id"`

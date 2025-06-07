@@ -1,9 +1,10 @@
 package domain
 
 type ServiceMessage struct {
-	Response string
-	Request  string
-	MaxToken int
+	Response    string
+	RequestText string
+	MaxToken    int
+	Model       string
 }
 
 //type Meta struct {

@@ -1,4 +1,4 @@
-package domain
+package deepSeek
 
 type Function struct {
 	Name      string `json:"name"`

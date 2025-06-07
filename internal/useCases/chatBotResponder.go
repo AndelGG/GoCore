@@ -2,6 +2,7 @@ package useCases
 
 import (
 	"awesomeProject/internal/domain"
+	"awesomeProject/internal/infrastructure/deepSeek"
 	"awesomeProject/internal/lib/logger/sl"
 	"fmt"
 	"log/slog"
@@ -13,7 +14,7 @@ type ChatBotResponder struct {
 }
 
 type ChatBot interface {
-	RequestToChatBot(message *domain.ServiceMessage) (domain.ResponseScheme, error)
+	RequestToChatBot(message *domain.ServiceMessage) (deepSeek.ResponseScheme, error)
 }
 
 func New(responder ChatBot, log *slog.Logger) *ChatBotResponder {
@@ -25,7 +26,6 @@ func New(responder ChatBot, log *slog.Logger) *ChatBotResponder {
 func (u *ChatBotResponder) SendMessage(message *domain.ServiceMessage) (*domain.ServiceMessage, error) {
 
 	op := "useCase.chatBotResponder.SendMessage"
-
 	obj, err := u.Responder.RequestToChatBot(message)
 
 	if err != nil {
@@ -33,7 +33,6 @@ func (u *ChatBotResponder) SendMessage(message *domain.ServiceMessage) (*domain.
 		return message, fmt.Errorf("%s: %w", op, err)
 	}
 
-	message.Request = obj.Choices[0].Message.Content
-
+	message.Response = obj.Choices[0].Message.Content
 	return message, nil
 }
