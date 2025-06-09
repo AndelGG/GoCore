@@ -2,7 +2,6 @@ package telegram
 
 import (
 	"awesomeProject/internal/clients/tgClient"
-	"awesomeProject/internal/controller"
 	"awesomeProject/internal/domain"
 	"awesomeProject/internal/lib/e"
 	"errors"
@@ -32,8 +31,7 @@ func New(client *tgClient.Client, useCase domain.ResponderUseCase) *Processor {
 	}
 }
 
-// Fetch convert Update to Event
-func (p *Processor) Fetch(limit int) ([]controller.Event, error) {
+func (p *Processor) Fetch(limit int) ([]Event, error) {
 	updates, err := p.tg.Updates(p.offset, limit)
 	fmt.Println(updates)
 
@@ -45,7 +43,7 @@ func (p *Processor) Fetch(limit int) ([]controller.Event, error) {
 		return nil, nil
 	}
 
-	res := make([]controller.Event, 0, len(updates))
+	res := make([]Event, 0, len(updates))
 
 	for _, u := range updates {
 		res = append(res, event(u))
@@ -56,9 +54,9 @@ func (p *Processor) Fetch(limit int) ([]controller.Event, error) {
 	return res, nil
 }
 
-func (p *Processor) Process(event controller.Event) error {
+func (p *Processor) Process(event Event) error {
 	switch event.Type {
-	case controller.Message:
+	case Message:
 		return p.processMessage(event)
 	default:
 		return e.Wrap("can't process message", ErrUnknownEventType)
@@ -66,7 +64,7 @@ func (p *Processor) Process(event controller.Event) error {
 
 }
 
-func (p *Processor) processMessage(event controller.Event) error {
+func (p *Processor) processMessage(event Event) error {
 	meta, err := meta(event)
 	if err != nil {
 		return e.Wrap("cant process message", err)
@@ -79,7 +77,7 @@ func (p *Processor) processMessage(event controller.Event) error {
 	return nil
 }
 
-func meta(event controller.Event) (Meta, error) {
+func meta(event Event) (Meta, error) {
 	res, ok := event.Meta.(Meta) // Type assertion
 	if !ok {
 		return Meta{}, e.Wrap("cant get meta", ErrUnknownMetaType)
@@ -88,15 +86,15 @@ func meta(event controller.Event) (Meta, error) {
 	return res, nil
 }
 
-func event(upd Update) controller.Event {
+func event(upd tgClient.Update) Event {
 	updType := fetchType(upd)
 
-	res := controller.Event{
+	res := Event{
 		Type: updType,
 		Text: fetchText(upd),
 	}
 
-	if updType == controller.Message {
+	if updType == Message {
 		res.Meta = Meta{
 			ChatID:   upd.Message.Chat.ID,
 			UserName: upd.Message.From.Username,
@@ -106,7 +104,7 @@ func event(upd Update) controller.Event {
 	return res
 }
 
-func fetchText(upd Update) string {
+func fetchText(upd tgClient.Update) string {
 	if upd.Message == nil {
 		return ""
 	}
@@ -114,9 +112,9 @@ func fetchText(upd Update) string {
 	return upd.Message.Text
 }
 
-func fetchType(upd Update) controller.Type {
+func fetchType(upd tgClient.Update) Type {
 	if upd.Message == nil {
-		return controller.Unknown
+		return Unknown
 	}
-	return controller.Message
+	return Message
 }

@@ -26,9 +26,6 @@ func (c *ChatBot) RequestToChatBot(message *domain.ServiceMessage) (ResponseSche
 		return ResponseScheme{}, err
 	}
 
-	client := &http.Client{}
-
-	res, err := client.Do(req)
 	if err != nil {
 		return ResponseScheme{}, fmt.Errorf("%s: %w", op, err)
 	}

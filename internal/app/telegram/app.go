@@ -2,7 +2,6 @@ package telegram
 
 import (
 	"awesomeProject/internal/clients/tgClient"
-	"awesomeProject/internal/controller"
 	"awesomeProject/internal/controller/telegram"
 	"awesomeProject/internal/domain"
 	"log/slog"
@@ -10,8 +9,8 @@ import (
 )
 
 type App struct {
-	fetcher   controller.Fetcher
-	processor controller.Processor
+	fetcher   telegram.Fetcher
+	processor telegram.Processor
 	batchSize int
 	log       *slog.Logger
 }
@@ -68,7 +67,7 @@ func (a *App) Run() error {
 	3. Параллельная обработка: sync.WaitGroup
 */
 
-func (a *App) handleEvents(events []controller.Event, log *slog.Logger) error {
+func (a *App) handleEvents(events []telegram.Event, log *slog.Logger) error {
 	for _, event := range events {
 		log.Info("got new event %s", event.Text)
 		if err := a.processor.Process(event); err != nil {

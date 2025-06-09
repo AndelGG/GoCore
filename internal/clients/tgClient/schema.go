@@ -1,4 +1,10 @@
-package telegram
+package tgClient
+
+import (
+	"awesomeProject/internal/domain"
+	"encoding/json"
+	"net/http"
+)
 
 type Update struct {
 	ID      int              `json:"update_id"`
@@ -22,4 +28,11 @@ type From struct {
 
 type Chat struct {
 	ID int `json:"id"`
+}
+
+func (u Update) Parse() (domain.ServiceMessage, error) {
+
+	message := domain.ServiceMessage{RequestText: u.Message.Text}
+
+	return message, nil
 }

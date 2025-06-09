@@ -11,6 +11,13 @@ const (
 	StartCmd = "/start"
 )
 
+const msgHello = "Hi there!"
+
+const (
+	msgUnknownCommand = "Unknown command"
+	msgSent           = "Sent"
+)
+
 // doCmd is api router
 func (p *Processor) doCmd(text string, chatID int, username string) error {
 	text = strings.TrimSpace(text)

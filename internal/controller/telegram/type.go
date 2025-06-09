@@ -1,4 +1,4 @@
-package controller
+package telegram
 
 type Fetcher interface {
 	Fetch(limit int) ([]Event, error)

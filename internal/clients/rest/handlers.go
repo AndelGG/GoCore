@@ -22,16 +22,12 @@ func New(useCase ResponderUseCase) *Requester {
 	return &Requester{request: useCase}
 }
 
-// TODO: разделить логику хэндлера
-
 func (q *Requester) ResponseHandler(w http.ResponseWriter, r *http.Request) {
 	var data RequestData
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		http.Error(w, "Unable to parse", http.StatusBadRequest)
 	}
-
-	// TODO: создавать обьект ДТО
 
 	resp := domain.ServiceMessage{Response: data.Message, MaxToken: 40}
 	var msg, err = q.request.SendMessage(&resp)
