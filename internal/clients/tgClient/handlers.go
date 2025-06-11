@@ -2,8 +2,14 @@ package tgClient
 
 import (
 	"awesomeProject/internal/domain"
-	"fmt"
+	"context"
+	"errors"
 	"net/http"
+)
+
+var (
+	ErrParse   = errors.New("the message does not match the pattern")
+	ErrChatBot = errors.New("chatbot returns an error")
 )
 
 type TelegramHandler interface {
@@ -11,12 +17,13 @@ type TelegramHandler interface {
 }
 
 type TelegramReply interface {
-	SendMessage(msg *domain.ServiceMessage) error
-	SendSticker(msg *domain.ServiceMessage) error
+	SendMessage(ctx context.Context, msg *domain.ServiceMessage) error
+	CatchError(ctx context.Context, err error) error
+	SendSticker(ctx context.Context, msg *domain.ServiceMessage) error
 }
 
 type ChatBotResponderUseCase interface {
-	SendMessage(message *domain.ServiceMessage) (*domain.ServiceMessage, error)
+	SendMessage(ctx context.Context, message *domain.ServiceMessage) (*domain.ServiceMessage, error)
 }
 
 type Requester struct {
@@ -29,30 +36,34 @@ func New(request ChatBotResponderUseCase, respond TelegramReply) *Requester {
 }
 
 func (q *Requester) WebHookHandler(w http.ResponseWriter, r *http.Request) {
-	var u Update
+	var raw Update
 
-	rawMsg, err := u.Parse(r)
+	if err := json.NewDecoder(r.Body).Decode(raw); err != nil {
+		return &domain.ServiceMessage{}, err
+	}
+
+	ctx := domain.ServiceMessage{}
 
 	if err != nil {
-		panic(err)
-		// tg err
+		q.respond.CatchError(ErrParse)
 	}
 
 	go func() {
-		resp, err := q.request.SendMessage(rawMsg)
-		if err != nil {
-			// tg err
-		}
-
-		err = q.respond.SendMessage(resp)
-		if err != nil {
-			// tg err
-		}
-
-		fmt.Println("tg resp: ", resp)
 
 	}()
 
-	fmt.Println("ok")
 	w.WriteHeader(http.StatusOK)
+}
+
+func (u *Update) Parse(r *http.Request) (*domain.ServiceMessage, error) {
+
+	text := u.Message.Text
+	id := u.Message.Chat.ID
+	maxToken := 40
+
+	model := "deepseek-chat"
+
+	message := domain.ServiceMessage{RequestText: text, ChatId: id, Model: model, MaxToken: maxToken}
+
+	return &message, nil
 }

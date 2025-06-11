@@ -1,0 +1,4 @@
+ChatBotApiKey: "sk"
+TelegramApiKey: ":"
+OpenRouterApiKey: "sk-or-v1"
+WebPort: 8080

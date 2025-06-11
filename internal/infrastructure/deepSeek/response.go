@@ -2,6 +2,7 @@ package deepSeek
 
 import (
 	"awesomeProject/internal/lib/req"
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -14,13 +15,13 @@ func New(api string) *ChatBot {
 	return &ChatBot{api}
 }
 
-func (c *ChatBot) RequestToChatBot(text, model string, maxToken int) (ResponseScheme, error) {
+func (c *ChatBot) RequestToChatBot(ctx context.Context, text, model string, maxToken int) (ResponseScheme, error) {
 
 	const op = "infrastructure.deepSeek.RequestToChatBot"
 
 	scheme := returnResponseScheme(maxToken, text, model)
 
-	body, err := req.MakeAuthorizationRequest(scheme, c.Api)
+	body, err := req.MakeAuthorizationRequest(ctx, scheme, c.Api)
 	if err != nil {
 		return ResponseScheme{}, fmt.Errorf("%s: %w", op, err)
 	}
@@ -28,7 +29,6 @@ func (c *ChatBot) RequestToChatBot(text, model string, maxToken int) (ResponseSc
 	// TODO: refactor
 	var responseObject ResponseScheme
 	if err := json.Unmarshal(body, &responseObject); err != nil {
-		fmt.Println(fmt.Sprintf("body: %b", body))
 		return ResponseScheme{}, fmt.Errorf("%s: %w", op, err)
 	}
 

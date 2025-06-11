@@ -38,3 +38,5 @@ func setupPrettySlog() *slog.Logger {
 
 	return slog.New(handler)
 }
+
+// TODO: разобраться с бизнес логикой, стандартизировать, изменить обьект message

@@ -1,6 +1,7 @@
 package req
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,12 +14,12 @@ const (
 	openRouterAPI = "https://openrouter.ai/api/v1"
 )
 
-func MakeAuthorizationRequest(scheme, apiKey string) ([]byte, error) {
+func MakeAuthorizationRequest(ctx context.Context, scheme, apiKey string) ([]byte, error) {
 	payload := strings.NewReader(scheme)
 
 	url := deepSeekAPI
 
-	req, err := CreateRequest(url, http.MethodPost, payload)
+	req, err := CreateRequest(ctx, url, http.MethodPost, payload)
 	if err != nil {
 		return nil, err
 	}
@@ -42,8 +43,8 @@ func MakeAuthorizationRequest(scheme, apiKey string) ([]byte, error) {
 	return body, nil
 }
 
-func MakeGetRequest(url string, query url.Values) ([]byte, error) {
-	req, err := CreateRequest(url, http.MethodGet, nil)
+func MakeGetRequest(ctx context.Context, url string, query url.Values) ([]byte, error) {
+	req, err := CreateRequest(ctx, url, http.MethodGet, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -67,10 +68,10 @@ func MakeGetRequest(url string, query url.Values) ([]byte, error) {
 	return body, nil
 }
 
-func CreateRequest(url, method string, payload io.Reader) (*http.Request, error) {
+func CreateRequest(ctx context.Context, url, method string, payload io.Reader) (*http.Request, error) {
 	const op = "lib.createRequest"
 
-	req, err := http.NewRequest(method, url, payload)
+	req, err := http.NewRequestWithContext(ctx, method, url, payload)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}

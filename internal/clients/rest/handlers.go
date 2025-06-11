@@ -2,13 +2,14 @@ package rest
 
 import (
 	"awesomeProject/internal/domain"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
 type ResponderUseCase interface {
-	SendMessage(message *domain.ServiceMessage) (*domain.ServiceMessage, error)
+	SendMessage(ctx context.Context, message *domain.ServiceMessage) (*domain.ServiceMessage, error)
 }
 type Requester struct {
 	request ResponderUseCase

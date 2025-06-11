@@ -3,21 +3,22 @@ package useCases
 import (
 	"awesomeProject/internal/domain"
 	"awesomeProject/internal/lib/logger/sl"
+	"context"
 	"fmt"
 	"log/slog"
 )
 
 type MainResponser interface {
-	SendMessage(chatId int, message string) error
+	SendMessage(ctx context.Context, chatId int, message string) error
 }
 
 type EventSender interface {
-	SendEvent(msg *domain.ServiceMessage) error
+	SendEvent(ctx context.Context, msg *domain.ServiceMessage) error
 }
 
 type TelegramResponder interface {
-	SendMessage(chatId int, message string) error
-	SendSticker(chatId int, message string) error
+	SendMessage(ctx context.Context, chatId int, message string) error
+	SendSticker(ctx context.Context, chatId int, message string) error
 }
 
 type EventSenderUseCase struct {
@@ -30,30 +31,43 @@ type TelegramReplyUseCase struct {
 	TgResponder TelegramResponder
 }
 
-func (e TelegramReplyUseCase) SendSticker(msg *domain.ServiceMessage) error {
+func (e TelegramReplyUseCase) SendSticker(ctx context.Context, msg *domain.ServiceMessage) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e EventSenderUseCase) SendEvent(msg *domain.ServiceMessage) error {
+func (e TelegramReplyUseCase) CatchError(ctx context.Context, err error) error {
 
-	op := "useCase.chatBotResponder.SendMessage"
-	err := e.Eventer.SendMessage(msg.ChatId, msg.RequestText)
+	// TODO: think about message object
+	op := "useCase.TelegramReplyUseCase.CatchError"
+	err := e.TgResponder.SendMessage(ctx, msg.ChatId, err.Error())
 	if err != nil {
-		e.log.Warn("request to chatbot error", sl.Err(err))
+		e.Log.Warn("reply tg error", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
 	return nil
 }
 
-func (e TelegramReplyUseCase) SendMessage(msg *domain.ServiceMessage) error {
+func (e EventSenderUseCase) SendEvent(ctx context.Context, msg *domain.ServiceMessage) error {
+
+	op := "useCase.EventSenderUseCase.SendEvent"
+	err := e.Eventer.SendMessage(ctx, msg.ChatId, msg.Response)
+	if err != nil {
+		e.log.Warn("catch event", sl.Err(err))
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	return nil
+}
+
+func (e TelegramReplyUseCase) SendMessage(ctx context.Context, msg *domain.ServiceMessage) error {
 
 	// TODO: think about message object
-	op := "useCase.chatBotResponder.SendMessage"
-	err := e.TgResponder.SendMessage(msg.ChatId, msg.Response)
+	op := "useCase.TelegramReplyUseCase.SendMessage"
+	err := e.TgResponder.SendMessage(ctx, msg.ChatId, msg.Response)
 	if err != nil {
-		e.Log.Warn("request to chatbot error", sl.Err(err))
+		e.Log.Warn("send tg message", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 

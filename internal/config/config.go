@@ -1,29 +1,33 @@
 package config
 
+import (
+	"gopkg.in/yaml.v3"
+	"os"
+)
+
 type Config struct {
-	ChatBotApiKey  string
-	TelegramApiKey string
-	ResponseTokens int `yaml:"responseTokens" env-default:"40"`
-	WebPort        int
+	ChatBotApiKey    string `yaml:"ChatBotApiKey"`
+	TelegramApiKey   string `yaml:"TelegramApiKey"`
+	OpenRouterApiKey string `yaml:"OpenRouterApiKey"`
+	WebPort          int    `yaml:"WebPort"`
 }
 
-// TODO: Make reading config
-
 func MustLoad() Config {
-	//if _, err := os.Stat("./config/config.yaml"); os.IsNotExist(err) {
-	//	panic("config does not exist")
-	//}
+	var conf Config
 
-	//chatBotApiKey := os.Getenv("DEEPSEEK_API_KEY")
-	//tgBotApiKey := os.Getenv("TELEGRAM_API_KEY")
+	file, err := os.ReadFile("./config/config.yaml")
+	if err != nil {
+		panic(err)
+	}
 
-	chatBotApiKey := ""
-	tgBotApiKey := ""
+	if err := yaml.Unmarshal(file, conf); err != nil {
+		panic(err)
+	}
 
 	return Config{
-		ChatBotApiKey:  chatBotApiKey,
-		TelegramApiKey: tgBotApiKey,
-		ResponseTokens: 40,
-		WebPort:        8080,
+		ChatBotApiKey:    conf.ChatBotApiKey,
+		TelegramApiKey:   conf.TelegramApiKey,
+		OpenRouterApiKey: conf.OpenRouterApiKey,
+		WebPort:          conf.WebPort,
 	}
 }
