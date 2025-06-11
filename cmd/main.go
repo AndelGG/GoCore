@@ -9,6 +9,9 @@ import (
 )
 
 func main() {
+
+	// TODO: make lifespan
+
 	cfg := config.MustLoad()
 
 	log := setupPrettySlog()
@@ -20,8 +23,8 @@ func main() {
 
 	server := app.New(cfg, log)
 
-	go server.TgServer.Run()
-	server.WebServer.MustRun()
+	server.TgServer.MustRun()
+	//server.WebServer.MustRun()
 }
 
 func setupPrettySlog() *slog.Logger {

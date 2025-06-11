@@ -2,6 +2,7 @@ package telegram
 
 import (
 	r "awesomeProject/internal/lib/req"
+	"fmt"
 	"net/url"
 	"path"
 	"strconv"
@@ -13,15 +14,15 @@ const (
 	sendMessage = "sendMessage"
 )
 
-type TelegramApi struct {
+type Api struct {
 	Api string
 }
 
-func New(api string) *TelegramApi {
-	return &TelegramApi{api}
+func New(api string) *Api {
+	return &Api{api}
 }
 
-func (t TelegramApi) SendMessage(chatId int, message string) error {
+func (t Api) SendMessage(chatId int, message string) error {
 	// TODO: hide
 	q := url.Values{}
 	q.Add("chat_id", strconv.Itoa(chatId))
@@ -35,7 +36,11 @@ func (t TelegramApi) SendMessage(chatId int, message string) error {
 	return nil
 }
 
-func (t TelegramApi) makeTgAction(action string) string {
+func (t Api) SendSticker(chatId int, message string) error {
+	return fmt.Errorf("sosi sosi")
+}
+
+func (t Api) makeTgAction(action string) string {
 
 	u := url.URL{
 		Scheme: "https",

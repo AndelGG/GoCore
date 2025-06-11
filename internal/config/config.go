@@ -1,7 +1,5 @@
 package config
 
-import "os"
-
 type Config struct {
 	ChatBotApiKey  string
 	TelegramApiKey string
@@ -16,8 +14,11 @@ func MustLoad() Config {
 	//	panic("config does not exist")
 	//}
 
-	chatBotApiKey := os.Getenv("DEEPSEEK_API_KEY")
-	tgBotApiKey := os.Getenv("TELEGRAM_API_KEY")
+	//chatBotApiKey := os.Getenv("DEEPSEEK_API_KEY")
+	//tgBotApiKey := os.Getenv("TELEGRAM_API_KEY")
+
+	chatBotApiKey := ""
+	tgBotApiKey := ""
 
 	return Config{
 		ChatBotApiKey:  chatBotApiKey,

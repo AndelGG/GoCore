@@ -2,80 +2,48 @@ package telegram
 
 import (
 	"awesomeProject/internal/clients/tgClient"
-	"awesomeProject/internal/controller/telegram"
-	"awesomeProject/internal/domain"
+	"awesomeProject/internal/infrastructure/telegram"
+	"awesomeProject/internal/useCases"
 	"log/slog"
-	"time"
+	"net/http"
+	"strconv"
 )
 
 type App struct {
-	fetcher   telegram.Fetcher
-	processor telegram.Processor
-	batchSize int
-	log       *slog.Logger
+	request tgClient.TelegramHandler
+	log     *slog.Logger
 }
 
-const (
-	tgBotHost = "api.telegram.org"
-	batchSize = 100
-)
+func New(chat tgClient.ChatBotResponderUseCase, log *slog.Logger, api string) *App {
 
-func New(token string, use domain.ResponderUseCase, log *slog.Logger) *App {
+	tg := telegram.New(api)
 
-	telegramClient := tgClient.New(tgBotHost, token)
+	reply := useCases.NewTelegramReply(log, tg)
 
-	eventsProcessor := telegram.New(telegramClient, use)
+	request := tgClient.New(chat, reply)
 
-	return &App{
-		fetcher:   eventsProcessor,
-		processor: eventsProcessor,
-		batchSize: batchSize,
-		log:       log,
+	return &App{request: request, log: log}
+}
+
+func (a *App) MustRun() {
+	const op = "webApp.Run"
+
+	port := 8000
+
+	addr := createAddress(port)
+
+	log := a.log.With(slog.String("op", op), slog.Int("port", port))
+
+	http.HandleFunc("/", a.request.WebHookHandler)
+
+	log.Info("starting TgServer", slog.String("address:", addr))
+
+	err := http.ListenAndServe(addr, nil)
+	if err != nil {
+		panic(err)
 	}
 }
 
-func (a *App) Run() error {
-	const op = "App.Tg.Run"
-
-	log := a.log.With(slog.String("op", op))
-
-	for {
-		gotEvents, err := a.fetcher.Fetch(a.batchSize)
-		if err != nil {
-			log.Warn("[ERR] consumer: %s", err.Error())
-
-			continue
-		}
-
-		if len(gotEvents) == 0 {
-			time.Sleep(1 * time.Second)
-
-			continue
-		}
-
-		if err := a.handleEvents(gotEvents, log); err != nil {
-			log.With(err)
-
-			continue
-		}
-	}
-}
-
-/*
-	1. Потеря событий: ретраи, возвращение в хранилище, фоллбэк, подтверждение
-	2. Обработка всей пачки: остановка после ошибки, счетчик ошибок
-	3. Параллельная обработка: sync.WaitGroup
-*/
-
-func (a *App) handleEvents(events []telegram.Event, log *slog.Logger) error {
-	for _, event := range events {
-		log.Info("got new event %s", event.Text)
-		if err := a.processor.Process(event); err != nil {
-			log.Warn("cant handle event: %s", err.Error())
-
-			continue
-		}
-	}
-
-	return nil
+func createAddress(port int) string {
+	return "localhost:" + strconv.Itoa(port)
 }

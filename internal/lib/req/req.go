@@ -13,8 +13,10 @@ const (
 	openRouterAPI = "https://openrouter.ai/api/v1"
 )
 
-func MakeAuthorizationRequest(url, scheme, apiKey string) ([]byte, error) {
+func MakeAuthorizationRequest(scheme, apiKey string) ([]byte, error) {
 	payload := strings.NewReader(scheme)
+
+	url := deepSeekAPI
 
 	req, err := CreateRequest(url, http.MethodPost, payload)
 	if err != nil {
@@ -67,42 +69,6 @@ func MakeGetRequest(url string, query url.Values) ([]byte, error) {
 
 func CreateRequest(url, method string, payload io.Reader) (*http.Request, error) {
 	const op = "lib.createRequest"
-
-	//if r.Model == "deepseek-chat" || r.Model == "deepseek-reasoner" {
-	//	url = deepSeekAPI
-	//} else {
-	//	url = openRouterAPI
-	//}
-
-	//		fmt.Sprintf(`{
-	//  "messages": [
-	//    {
-	//      "content": "You are a helpful assistant",
-	//      "role": "system"
-	//    },
-	//    {
-	//      "content": "%s",
-	//      "role": "user"
-	//	}
-	//  ],
-	//  "model": "deepseek-chat",
-	//  "frequency_penalty": 0,
-	//  "max_tokens": %d,
-	//  "presence_penalty": 0,
-	//  "response_format": {
-	//    "type": "text"
-	//  },
-	//  "stop": null,
-	//  "stream": false,
-	//  "stream_options": null,
-	//  "temperature": 1,
-	//  "top_p": 1,
-	//  "tools": null,
-	//  "tool_choice": "none",
-	//  "logprobs": false,
-	//  "top_logprobs": null
-	//}`, r.RequestText, r.MaxToken)
-	//)
 
 	req, err := http.NewRequest(method, url, payload)
 	if err != nil {

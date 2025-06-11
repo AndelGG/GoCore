@@ -5,6 +5,7 @@ type ServiceMessage struct {
 	RequestText string
 	MaxToken    int
 	Model       string
+	ChatId      int
 }
 
 //type Meta struct {

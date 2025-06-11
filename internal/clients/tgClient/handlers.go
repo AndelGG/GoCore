@@ -2,36 +2,57 @@ package tgClient
 
 import (
 	"awesomeProject/internal/domain"
-	"awesomeProject/internal/lib/jsonParser"
 	"fmt"
 	"net/http"
 )
 
-type ResponderUseCase interface {
-	SendMessage(message *domain.ServiceMessage) (*domain.ServiceMessage, error)
-}
-type Requester struct {
-	request ResponderUseCase
+type TelegramHandler interface {
+	WebHookHandler(w http.ResponseWriter, r *http.Request)
 }
 
-func New(useCase ResponderUseCase) *Requester {
-	return &Requester{request: useCase}
+type TelegramReply interface {
+	SendMessage(msg *domain.ServiceMessage) error
+	SendSticker(msg *domain.ServiceMessage) error
+}
+
+type ChatBotResponderUseCase interface {
+	SendMessage(message *domain.ServiceMessage) (*domain.ServiceMessage, error)
+}
+
+type Requester struct {
+	request ChatBotResponderUseCase
+	respond TelegramReply
+}
+
+func New(request ChatBotResponderUseCase, respond TelegramReply) *Requester {
+	return &Requester{request: request, respond: respond}
 }
 
 func (q *Requester) WebHookHandler(w http.ResponseWriter, r *http.Request) {
+	var u Update
 
-	msg, err := jsonParser.JsonParser(r)
+	rawMsg, err := u.Parse(r)
+
 	if err != nil {
+		panic(err)
 		// tg err
 	}
 
-	resp, err := q.request.SendMessage(&msg)
-	if err != nil {
-		// tg err
-	}
+	go func() {
+		resp, err := q.request.SendMessage(rawMsg)
+		if err != nil {
+			// tg err
+		}
 
-	// tg resp
-	fmt.Print("tg resp: ", resp)
+		err = q.respond.SendMessage(resp)
+		if err != nil {
+			// tg err
+		}
 
+		fmt.Println("tg resp: ", resp)
+
+	}()
+
+	fmt.Println("ok")
 	w.WriteHeader(http.StatusOK)
 }

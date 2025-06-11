@@ -14,19 +14,19 @@ type ChatBotResponder struct {
 }
 
 type ChatBot interface {
-	RequestToChatBot(message *domain.ServiceMessage) (deepSeek.ResponseScheme, error)
+	RequestToChatBot(text, model string, maxToken int) (deepSeek.ResponseScheme, error)
 }
 
-func New(responder ChatBot, log *slog.Logger) *ChatBotResponder {
+func NewChatBotResponder(responder ChatBot, log *slog.Logger) *ChatBotResponder {
 	return &ChatBotResponder{
 		responder, log,
 	}
 }
 
-func (u *ChatBotResponder) SendMessage(message *domain.ServiceMessage) (*domain.ServiceMessage, error) {
+func (u ChatBotResponder) SendMessage(message *domain.ServiceMessage) (*domain.ServiceMessage, error) {
 
 	op := "useCase.chatBotResponder.SendMessage"
-	obj, err := u.Responder.RequestToChatBot(message)
+	obj, err := u.Responder.RequestToChatBot(message.RequestText, message.Model, message.MaxToken)
 
 	if err != nil {
 		u.log.Warn("request to chatbot error", sl.Err(err))
